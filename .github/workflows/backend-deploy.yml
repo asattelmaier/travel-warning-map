@@ -48,14 +48,14 @@ jobs:
           name: backend-build
           path: backend/dist
 
-      - name: Login to Artifact Registry
-        env:
-          PROJECT_ID: ${{ secrets.GCLOUD_PROJECT_ID }}
-        uses: google-github-actions/setup-gcloud@v1
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
         with:
-          service_account_key: ${{ secrets.GCLOUD_SA_KEY }}
-          project_id: ${{ env.GCLOUD_PROJECT_ID }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCLOUD_SA_KEY }}
+          project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: Configure Docker Client
         run: |-
