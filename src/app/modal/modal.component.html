@@ -1,0 +1,18 @@
+<div *ngIf="isOpen" class="modal-overlay" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="title-container">
+        <h2>{{ title }}</h2>
+      </div>
+      <button class="close-button" (click)="close()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-info">
+        <p><strong>Status:</strong> {{ status }}</p>
+        <p><strong>Letzte Aktualisierung:</strong> {{ lastModified }}</p>
+        <p><strong>Gültig seit:</strong> {{ effective }}</p>
+      </div>
+      <div class="warning-description" [innerHTML]="content"></div>
+    </div>
+  </div>
+</div> 

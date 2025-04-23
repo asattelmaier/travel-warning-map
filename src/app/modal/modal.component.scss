@@ -1,0 +1,137 @@
+@import '../../styles/theme';
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background-color: rgba($background-color, $overlay-opacity);
+  display: flex;
+  justify-content: flex-end;
+  z-index: $z-index-modal;
+}
+
+.modal-content {
+  background-color: $background-color;
+  width: 100%;
+  height: 100%;
+  padding: $spacing-xl;
+  overflow-y: auto;
+  box-shadow: $shadow-md;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  padding-bottom: $spacing-md;
+  border-bottom: 2px solid rgba($primary-color, 0.1);
+}
+
+.title-container h2 {
+  color: $primary-color;
+  font-size: $font-size-xl;
+  font-weight: bold;
+  margin: 0;
+}
+
+.close-button {
+  background: $primary-color;
+  width: 40px;
+  height: 40px;
+  border-radius: $border-radius-full;
+  font-size: $font-size-lg;
+  color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition-base;
+  box-shadow: $shadow-primary;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.warning-info {
+  background: $white;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+
+  p {
+    color: $text-color;
+    font-size: $font-size-md;
+    margin-bottom: $spacing-sm;
+    line-height: $line-height-base;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.warning-description {
+  background: $white;
+  padding: $spacing-lg;
+  border-radius: $border-radius-md;
+  font-size: $font-size-base;
+  line-height: $line-height-lg;
+  color: $text-color;
+  box-shadow: $shadow-sm;
+
+  h2, h3, h4 {
+    color: $text-color;
+    margin-top: $spacing-lg;
+    margin-bottom: $spacing-md;
+    font-weight: bold;
+  }
+
+  p {
+    margin-bottom: $spacing-md;
+  }
+
+  ul {
+    margin-bottom: $spacing-lg;
+    padding-left: $spacing-lg;
+  }
+
+  li {
+    margin-bottom: $spacing-xs;
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .modal-overlay {
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: $spacing-lg;
+  }
+
+  .modal-header {
+    margin-bottom: $spacing-lg;
+  }
+
+  .title-container h2 {
+    font-size: $font-size-lg;
+  }
+
+  .warning-info {
+    padding: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    p {
+      font-size: $font-size-base;
+    }
+  }
+
+  .warning-description {
+    padding: $spacing-md;
+    font-size: $font-size-sm;
+  }
+} 

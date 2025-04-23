@@ -1,0 +1,10 @@
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="!isGoogleMapsReady && !errorMessage" class="loading-message">
+  Loading Google Maps...
+</div>
+
+<app-map *ngIf="isGoogleMapsReady"></app-map>
+

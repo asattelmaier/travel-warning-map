@@ -1,0 +1,10 @@
+<div id="map" class="map-container"></div>
+<app-modal
+  [isOpen]="isModalOpen"
+  [title]="modalTitle"
+  [status]="modalStatus"
+  [lastModified]="modalLastModified"
+  [effective]="modalEffective"
+  [content]="modalContent"
+  (closeModal)="closeModal()"
+></app-modal>

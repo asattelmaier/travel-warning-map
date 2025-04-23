@@ -1,0 +1,45 @@
+// Colors
+$primary-color: #1B4B43;
+$background-color: #FFF6E9;
+$white: #FFFFFF;
+$text-color: $primary-color;
+
+// Shadows
+$shadow-sm: 4px 4px 20px rgba(149, 157, 165, 0.1);
+$shadow-md: 8px 8px 24px rgba(149, 157, 165, 0.2);
+$shadow-primary: 0 4px 15px rgba($primary-color, 0.2);
+
+// Border Radius
+$border-radius-sm: 15px;
+$border-radius-md: 20px;
+$border-radius-lg: 25px;
+$border-radius-full: 50%;
+
+// Typography
+$font-size-sm: 13px;
+$font-size-base: 14px;
+$font-size-md: 16px;
+$font-size-lg: 24px;
+$font-size-xl: 28px;
+
+$line-height-base: 1.5;
+$line-height-lg: 1.6;
+
+// Spacing
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+$spacing-xl: 25px;
+
+// Breakpoints
+$breakpoint-mobile: 768px;
+
+// Z-index
+$z-index-modal: 1000;
+
+// Transitions
+$transition-base: all 0.3s ease;
+
+// Opacity
+$overlay-opacity: 0.95; 
