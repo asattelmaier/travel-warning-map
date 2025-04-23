@@ -6,5 +6,6 @@
   Loading Google Maps...
 </div>
 
+<app-info-modal *ngIf="showModal" (close)="closeModal()"></app-info-modal>
 <app-map *ngIf="isGoogleMapsReady"></app-map>
 

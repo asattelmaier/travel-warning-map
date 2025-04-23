@@ -7,12 +7,14 @@ import { AppComponent } from './app.component';
 import { MapComponent } from './map/map.component';
 import { TravelWarningService } from './services/travel-warning.service';
 import { ModalComponent } from './modal/modal.component';
+import { InfoModalComponent } from './info-modal/info-modal.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MapComponent,
-    ModalComponent
+    ModalComponent,
+    InfoModalComponent
   ],
   imports: [
     BrowserModule,
