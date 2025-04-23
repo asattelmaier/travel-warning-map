@@ -73,16 +73,3 @@ jobs:
           tags: |
             europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:${{ github.sha }}
             europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:latest
-
-      - name: Deploy to Cloud Run
-        env:
-          SERVICE_NAME: travel-warning-api
-          IMAGE_NAME: travel-warning-api
-          REGION: europe-west1
-        run: |-
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --project=${{ secrets.GCLOUD_PROJECT_ID }} \
-            --region=${{ env.REGION }} \
-            --platform managed \
-            --allow-unauthenticated
