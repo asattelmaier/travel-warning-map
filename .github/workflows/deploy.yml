@@ -9,6 +9,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
