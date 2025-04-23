@@ -48,7 +48,7 @@ jobs:
           name: backend-build
           path: backend/dist
 
-      - name: Login to GCR
+      - name: Login to Artifact Registry
         env:
           PROJECT_ID: ${{ secrets.GCLOUD_PROJECT_ID }}
         uses: google-github-actions/setup-gcloud@v1
@@ -59,7 +59,7 @@ jobs:
 
       - name: Configure Docker Client
         run: |-
-          gcloud auth configure-docker --quiet
+          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -71,8 +71,8 @@ jobs:
           push: true
           file: ./backend/Dockerfile
           tags: |
-            eu.gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            eu.gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ env.IMAGE_NAME }}:latest
+            europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy to Cloud Run
         env:
@@ -81,7 +81,7 @@ jobs:
           REGION: europe-west1
         run: |-
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image eu.gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --image europe-west1-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/travel-warnings/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --project=${{ secrets.GCLOUD_PROJECT_ID }} \
             --region=${{ env.REGION }} \
             --platform managed \
