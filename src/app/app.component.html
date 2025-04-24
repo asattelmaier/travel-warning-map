@@ -1,11 +1,9 @@
-<div *ngIf="errorMessage" class="error-message">
-  {{ errorMessage }}
-</div>
-
-<div *ngIf="!isGoogleMapsReady && !errorMessage" class="loading-message">
-  Loading Google Maps...
+<div class="app-container">
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+  <app-map></app-map>
 </div>
 
 <app-info-modal *ngIf="showModal" (close)="closeModal()"></app-info-modal>
-<app-map *ngIf="isGoogleMapsReady"></app-map>
 

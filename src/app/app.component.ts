@@ -6,7 +6,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  isGoogleMapsReady = true; // Always true now since we're using Leaflet
   errorMessage: string | null = null;
   showModal = true; // Set to true to show the modal initially
 
