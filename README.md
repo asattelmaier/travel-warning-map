@@ -3,12 +3,14 @@
 ## Project Description
 This app serves as a proof of concept for my own investigation into inference models for coding. I aim to let the model write the application with minimal intervention, providing only the technical requirements. The goal is to achieve implementation as autonomously as possible by the inference model.
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/asattelmaier/reisewarnungen.git
-   cd reisewarnungen
-   ```
+## Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/asattelmaier/travel-warning-map.git
+cd travel-warning-map
+```
 
 2. Install the dependencies:
    ```bash
