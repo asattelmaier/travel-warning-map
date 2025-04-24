@@ -22,12 +22,8 @@ yarn-error.log
 *.sublime-workspace
 
 # Visual Studio Code
-.vscode/tasks.json
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+.vscode/
+.cursor/
 
 # Miscellaneous
 /.angular/cache
