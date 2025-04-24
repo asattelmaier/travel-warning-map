@@ -1,14 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import 'styles/theme';
+@use 'styles/theme' as theme;
 
 // Global styles
 body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: $text-color;
-  background-color: $background-color;
+  color: theme.$text-color;
+  background-color: theme.$background-color;
 }
 
 // Reset styles
@@ -32,41 +32,41 @@ button {
 
 // Common utility classes
 .shadow-sm {
-  box-shadow: $shadow-sm;
+  box-shadow: theme.$shadow-sm;
 }
 
 .shadow-md {
-  box-shadow: $shadow-md;
+  box-shadow: theme.$shadow-md;
 }
 
 .rounded-sm {
-  border-radius: $border-radius-sm;
+  border-radius: theme.$border-radius-sm;
 }
 
 .rounded-md {
-  border-radius: $border-radius-md;
+  border-radius: theme.$border-radius-md;
 }
 
 .rounded-lg {
-  border-radius: $border-radius-lg;
+  border-radius: theme.$border-radius-lg;
 }
 
 .bg-white {
-  background-color: $white;
+  background-color: theme.$white;
 }
 
 .bg-primary {
-  background-color: $primary-color;
+  background-color: theme.$primary-color;
 }
 
 .text-primary {
-  color: $primary-color;
+  color: theme.$primary-color;
 }
 
 // Leaflet popup styles
 .leaflet-popup-content-wrapper {
   padding: 0 !important;
-  border-radius: $border-radius-md !important;
+  border-radius: theme.$border-radius-md !important;
   
   .leaflet-popup-content {
     margin: 0 !important;
@@ -75,28 +75,28 @@ button {
 
 .map-popup {
   max-width: 300px;
-  background: $background-color;
-  border-radius: $border-radius-md;
-  padding: $spacing-lg;
-  box-shadow: $shadow-md;
+  background: theme.$background-color;
+  border-radius: theme.$border-radius-md;
+  padding: theme.$spacing-lg;
+  box-shadow: theme.$shadow-md;
 
   h3 {
-    color: $text-color;
-    font-size: $font-size-lg;
-    margin-bottom: $spacing-md;
+    color: theme.$text-color;
+    font-size: theme.$font-size-lg;
+    margin-bottom: theme.$spacing-md;
     font-weight: bold;
   }
 
   .info-container {
-    background: $white;
-    border-radius: $border-radius-sm;
-    padding: $spacing-md;
-    margin-bottom: $spacing-md;
+    background: theme.$white;
+    border-radius: theme.$border-radius-sm;
+    padding: theme.$spacing-md;
+    margin-bottom: theme.$spacing-md;
 
     p {
-      color: $text-color;
-      font-size: $font-size-base;
-      margin-bottom: $spacing-xs;
+      color: theme.$text-color;
+      font-size: theme.$font-size-base;
+      margin-bottom: theme.$spacing-xs;
 
       &:last-child {
         margin-bottom: 0;
@@ -106,16 +106,16 @@ button {
 
   .details-button {
     width: 100%;
-    padding: $spacing-sm;
-    background-color: $primary-color;
-    color: $white;
+    padding: theme.$spacing-sm;
+    background-color: theme.$primary-color;
+    color: theme.$white;
     border: none;
-    border-radius: $border-radius-sm;
+    border-radius: theme.$border-radius-sm;
     cursor: pointer;
-    font-size: $font-size-md;
+    font-size: theme.$font-size-md;
     font-weight: bold;
-    box-shadow: $shadow-primary;
-    transition: $transition-base;
+    box-shadow: theme.$shadow-primary;
+    transition: theme.$transition-base;
 
     &:hover {
       transform: scale(1.02);

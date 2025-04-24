@@ -70,12 +70,15 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "travel-warning-map:build"
+          },
           "configurations": {
             "production": {
-              "browserTarget": "travel-warning-map:build:production"
+              "buildTarget": "travel-warning-map:build:production"
             },
             "development": {
-              "browserTarget": "travel-warning-map:build:development"
+              "buildTarget": "travel-warning-map:build:development"
             }
           },
           "defaultConfiguration": "development"
