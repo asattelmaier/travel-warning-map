@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import { TravelWarningService } from '../services/travel-warning.service';
 import { TravelWarningSummary } from '../models/travel-warning';
-import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { ModalComponent } from '../modal/modal.component';
 
 @Component({
