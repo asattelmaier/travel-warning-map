@@ -23,6 +23,10 @@ env:
   TF_VAR_project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
   TF_VAR_region: europe-west3
   TF_VAR_environment: production
+  TF_VAR_image_tag: ${{ github.sha }}
+  TF_VAR_drive_folder_id: ${{ secrets.DRIVE_FOLDER_ID }}
+  TF_VAR_google_cred_b64: ${{ secrets.GOOGLE_CRED_B64 }}
+  TF_VAR_service_account_email: ${{ secrets.SERVICE_ACCOUNT }}
 
 permissions:
   id-token: write
@@ -56,15 +60,15 @@ jobs:
         # if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
         run: |
           cd backend
-          docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/backend/backend:${{ github.sha }} .
-          docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/backend/backend:${{ github.sha }}
+          docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-backend/backend:${{ github.sha }} .
+          docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-backend/backend:${{ github.sha }}
 
       - name: Build and Push Data Ingestion Image
         # if: contains(github.event.head_commit.modified, 'data-ingestion/') || contains(github.event.head_commit.added, 'data-ingestion/')
         run: |
           cd data-ingestion
-          docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/data-ingestion/data-ingestion:${{ github.sha }} .
-          docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/data-ingestion/data-ingestion:${{ github.sha }}
+          docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-data-ingestion/data-ingestion:${{ github.sha }} .
+          docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-data-ingestion/data-ingestion:${{ github.sha }}
 
   deploy-infrastructure:
     name: Deploy Infrastructure
@@ -94,16 +98,22 @@ jobs:
         run: |
           cd infrastructure/backend
           terraform init
+          cd ../data-ingestion
+          terraform init
 
       - name: Terraform Plan
         run: |
           cd infrastructure/backend
+          terraform plan
+          cd ../data-ingestion
           terraform plan
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: |
           cd infrastructure/backend
+          terraform apply -auto-approve
+          cd ../data-ingestion
           terraform apply -auto-approve
 
   deploy-frontend:
