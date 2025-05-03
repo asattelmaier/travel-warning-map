@@ -39,8 +39,13 @@ class DriveService:
             print(f"Verifying access to folder {self.drive_folder_id}...")
             result = self.drive_service.files().get(
                 fileId=self.drive_folder_id,
-                fields='id, name'
+                fields='id, name, mimeType'
             ).execute()
+            
+            # Verify that it's actually a folder
+            if result.get('mimeType') != 'application/vnd.google-apps.folder':
+                raise ValueError(f"ID {self.drive_folder_id} is not a folder")
+                
             print(f"Successfully accessed folder: {result.get('name')}")
         except HttpError as e:
             if e.resp.status == 404:
@@ -55,6 +60,27 @@ class DriveService:
                 )
             else:
                 raise
+
+    def _validate_folder_structure(self, folder_id: str, expected_name: str) -> None:
+        """Validate that a folder has the expected name and type."""
+        try:
+            result = self.drive_service.files().get(
+                fileId=folder_id,
+                fields='id, name, mimeType'
+            ).execute()
+            
+            if result.get('mimeType') != 'application/vnd.google-apps.folder':
+                raise ValueError(f"ID {folder_id} is not a folder")
+                
+            if result.get('name') != expected_name:
+                raise ValueError(f"Folder name mismatch: expected {expected_name}, got {result.get('name')}")
+                
+        except HttpError as e:
+            if e.resp.status == 404:
+                raise ValueError(f"Folder with ID {folder_id} not found")
+            elif e.resp.status == 403:
+                raise PermissionError(f"No access to folder with ID {folder_id}")
+            raise
 
     def _get_today_folder_id(self) -> Optional[str]:
         """Get the folder ID for today's data."""
@@ -76,6 +102,8 @@ class DriveService:
                 return None
                 
             origin_id = origin_folders[0]['id']
+            # Validate origin folder
+            self._validate_folder_structure(origin_id, settings.DRIVE_ORIGIN_FOLDER)
             print(f"Found origin folder: {origin_folders[0]['name']} (ID: {origin_id})")
             
             # Then get today's folder
@@ -92,8 +120,11 @@ class DriveService:
                 print("No folder found for today's date")
                 return None
                 
-            print(f"Found today's folder: {date_folders[0]['name']} (ID: {date_folders[0]['id']})")
-            return date_folders[0]['id']
+            date_id = date_folders[0]['id']
+            # Validate date folder
+            self._validate_folder_structure(date_id, today)
+            print(f"Found today's folder: {date_folders[0]['name']} (ID: {date_id})")
+            return date_id
             
         except HttpError as e:
             if e.resp.status == 403:
@@ -120,6 +151,8 @@ class DriveService:
                 return None
                 
             origin_id = origin_folders[0]['id']
+            # Validate origin folder
+            self._validate_folder_structure(origin_id, settings.DRIVE_ORIGIN_FOLDER)
             print(f"Found origin folder: {origin_folders[0]['name']} (ID: {origin_id})")
             
             # Then get yesterday's folder
@@ -136,13 +169,26 @@ class DriveService:
                 print("No folder found for yesterday's date")
                 return None
                 
-            print(f"Found yesterday's folder: {date_folders[0]['name']} (ID: {date_folders[0]['id']})")
-            return date_folders[0]['id']
+            date_id = date_folders[0]['id']
+            # Validate date folder
+            self._validate_folder_structure(date_id, yesterday)
+            print(f"Found yesterday's folder: {date_folders[0]['name']} (ID: {date_id})")
+            return date_id
             
         except HttpError as e:
             if e.resp.status == 403:
                 raise PermissionError(f"No access to list contents of folder {self.drive_folder_id}")
             raise
+
+    def _validate_warning_id(self, warning_id: str) -> None:
+        """Validate that the warning ID is a number with max 6 digits."""
+        # Check if warning_id is a number
+        if not warning_id.isdigit():
+            raise ValueError("Invalid warning ID format: must be a number")
+        
+        # Check length (max 6 digits)
+        if len(warning_id) > 6:
+            raise ValueError("Warning ID must not be longer than 6 digits")
 
     def get_travel_warnings(self, language: str = "en") -> Dict:
         """Get all travel warnings for today, falling back to yesterday's data if today's data is not available."""
@@ -161,13 +207,17 @@ class DriveService:
             results = self.drive_service.files().list(
                 q=query,
                 spaces='drive',
-                fields='files(id, name, size)'
+                fields='files(id, name, size, mimeType)'
             ).execute()
 
             files = results.get('files', [])
             if not files:
                 print("No travelwarning.json found")
                 return {"response": {}}
+                
+            # Validate file type
+            if files[0].get('mimeType') != 'application/json':
+                raise ValueError(f"File {files[0]['name']} is not a JSON file")
                 
             print(f"Found travelwarning.json (size: {files[0].get('size', 'unknown')} bytes)")
             
@@ -210,6 +260,9 @@ class DriveService:
 
     def get_travel_warning(self, warning_id: str, language: str = "en") -> Dict:
         """Get a specific travel warning by ID, falling back to yesterday's data if today's data is not available."""
+        # Validate warning_id before using it
+        self._validate_warning_id(warning_id)
+        
         today_folder_id = self._get_today_folder_id()
         if not today_folder_id:
             print("No folder found for today, trying yesterday's folder")
@@ -234,21 +287,27 @@ class DriveService:
                 return {"response": {}}
                 
             travel_folder_id = travel_folders[0]['id']
+            # Validate travelwarning folder
+            self._validate_folder_structure(travel_folder_id, settings.DRIVE_TRAVELWARNING_FOLDER)
             print(f"Found travelwarning folder: {travel_folders[0]['name']} (ID: {travel_folder_id})")
 
-            # Get the specific warning file
+            # Get the specific warning file - using validated warning_id
             warning_query = f"name = '{warning_id}.json' and '{travel_folder_id}' in parents"
             print(f"Searching for warning file with query: {warning_query}")
             warning_results = self.drive_service.files().list(
                 q=warning_query,
                 spaces='drive',
-                fields='files(id, name)'
+                fields='files(id, name, mimeType)'
             ).execute()
             
             warning_files = warning_results.get('files', [])
             if not warning_files:
                 print(f"No file found for warning {warning_id}")
                 return {"response": {}}
+                
+            # Validate file type
+            if warning_files[0].get('mimeType') != 'application/json':
+                raise ValueError(f"File {warning_files[0]['name']} is not a JSON file")
                 
             print(f"Found warning file: {warning_files[0]['name']}")
             
