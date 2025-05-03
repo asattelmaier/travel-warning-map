@@ -50,6 +50,11 @@ resource "google_cloud_run_v2_service" "backend" {
     service_account = data.terraform_remote_state.base.outputs.service_account_email
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project_id}/${data.terraform_remote_state.base.outputs.artifact_registry_repository}/backend:${var.image_tag}"
+      
+      env {
+        name  = "DRIVE_FOLDER_ID"
+        value = var.drive_folder_id
+      }
     }
   }
 
