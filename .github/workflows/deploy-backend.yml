@@ -54,7 +54,6 @@ jobs:
         run: gcloud auth configure-docker europe-west3-docker.pkg.dev
 
       - name: Build and Push Backend Image
-        if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
         run: |
           cd backend
           docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-backend/backend:${{ github.sha }} .
