@@ -1,36 +1,27 @@
-# Build stage
-FROM node:18-alpine as builder
+# Use Python 3.9 slim image as base
+FROM python:3.9-slim
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN npm ci
+# Copy project files
+COPY pyproject.toml setup.cfg README.md ./
+COPY app ./app
 
-# Copy source code
-COPY . .
+# Install Python dependencies
+RUN pip install --no-cache-dir .
 
-# Build TypeScript
-RUN npm run build
-
-# Production stage
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
-
-# Copy built files from builder
-COPY --from=builder /app/dist ./dist
+# Set environment variables
+ENV PORT=3000
+ENV HOST=0.0.0.0
 
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"] 
