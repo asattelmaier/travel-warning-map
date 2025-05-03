@@ -17,11 +17,11 @@ import os
 import sys
 import time
 import json
-import base64
 import requests
 from datetime import datetime
 from io import BytesIO
-from google.oauth2 import service_account
+from google.auth import default
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 
@@ -34,23 +34,19 @@ DRIVE_ROOT_ID = os.environ.get("DRIVE_FOLDER_ID")
 if not DRIVE_ROOT_ID:
     print("❌ DRIVE_FOLDER_ID not set")
     sys.exit(1)
-B64 = os.environ.get("GOOGLE_CRED_B64")
-if not B64:
-    print("❌ GOOGLE_CRED_B64 not set")
-    sys.exit(1)
-try:
-    SA_INFO = json.loads(base64.b64decode(B64).decode())
-except Exception as e:
-    print(f"❌ Invalid GOOGLE_CRED_B64: {e}")
-    sys.exit(1)
-SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+# Define required scopes - using minimal drive.file scope
+SCOPES = ['https://www.googleapis.com/auth/drive.file']
 
 # Drive service singleton
 SERVICE = None
 def get_service():
     global SERVICE
     if SERVICE is None:
-        creds = service_account.Credentials.from_service_account_info(SA_INFO, scopes=SCOPES)
+        print("Using gcloud application default credentials...")
+        creds, _ = default(scopes=SCOPES)
+        if not creds.valid:
+            creds.refresh(Request())
         SERVICE = build('drive', 'v3', credentials=creds)
     return SERVICE
 

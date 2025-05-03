@@ -55,10 +55,6 @@ resource "google_cloud_run_v2_job" "data_ingestion" {
           name  = "DRIVE_FOLDER_ID"
           value = var.drive_folder_id
         }
-        env {
-          name  = "GOOGLE_CRED_B64"
-          value = var.google_cred_b64
-        }
       }
     }
   }

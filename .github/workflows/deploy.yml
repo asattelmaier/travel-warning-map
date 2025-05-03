@@ -25,7 +25,6 @@ env:
   TF_VAR_environment: production
   TF_VAR_image_tag: ${{ github.sha }}
   TF_VAR_drive_folder_id: ${{ secrets.DRIVE_FOLDER_ID }}
-  TF_VAR_google_cred_b64: ${{ secrets.GOOGLE_CRED_B64 }}
   TF_VAR_service_account_email: ${{ secrets.SERVICE_ACCOUNT }}
 
 permissions:

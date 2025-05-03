@@ -11,7 +11,6 @@ RUN pip install --no-cache-dir \
     google-api-python-client>=2.0 \
     google-auth>=2.0
 
-ENV DRIVE_FOLDER_ID="" \
-    GOOGLE_CRED_B64=""
+ENV DRIVE_FOLDER_ID=""
 
 ENTRYPOINT ["python", "/app/data_ingestion.py"]
