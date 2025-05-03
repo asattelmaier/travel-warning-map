@@ -1,0 +1,101 @@
+name: Deploy Data Ingestion
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data-ingestion/**'
+      - 'infrastructure/data-ingestion/**'
+      - '.github/workflows/deploy-data-ingestion.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'data-ingestion/**'
+      - 'infrastructure/data-ingestion/**'
+      - '.github/workflows/deploy-data-ingestion.yml'
+
+env:
+  GCLOUD_PROJECT_ID: ${{ secrets.GCLOUD_PROJECT_ID }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+  TF_VAR_project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+  TF_VAR_region: europe-west3
+  TF_VAR_environment: production
+  TF_VAR_image_tag: ${{ github.sha }}
+  TF_VAR_drive_folder_id: ${{ secrets.DRIVE_FOLDER_ID }}
+  TF_VAR_service_account_email: ${{ secrets.SERVICE_ACCOUNT }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push-data-ingestion:
+    name: Build and Push Data Ingestion Image
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker europe-west3-docker.pkg.dev
+
+      - name: Build and Push Data Ingestion Image
+        if: contains(github.event.head_commit.modified, 'data-ingestion/') || contains(github.event.head_commit.added, 'data-ingestion/')
+        run: |
+          cd data-ingestion
+          docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-data-ingestion/data-ingestion:${{ github.sha }} .
+          docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-data-ingestion/data-ingestion:${{ github.sha }}
+
+  deploy-data-ingestion-infrastructure:
+    name: Deploy Data Ingestion Infrastructure
+    needs: build-and-push-data-ingestion
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/data-ingestion
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd infrastructure/data-ingestion
+          terraform plan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd infrastructure/data-ingestion
+          terraform apply -auto-approve 
