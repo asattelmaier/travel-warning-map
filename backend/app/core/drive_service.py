@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 from pathlib import Path
@@ -100,12 +100,59 @@ class DriveService:
                 raise PermissionError(f"No access to list contents of folder {self.drive_folder_id}")
             raise
 
+    def _get_yesterday_folder_id(self) -> Optional[str]:
+        """Get the folder ID for yesterday's data."""
+        yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        
+        # First get the origin folder
+        origin_query = f"name = '{settings.DRIVE_ORIGIN_FOLDER}' and '{self.drive_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
+        print(f"Searching for origin folder with query: {origin_query}")
+        try:
+            origin_results = self.drive_service.files().list(
+                q=origin_query,
+                spaces='drive',
+                fields='files(id, name)'
+            ).execute()
+            
+            origin_folders = origin_results.get('files', [])
+            if not origin_folders:
+                print("No origin folder found")
+                return None
+                
+            origin_id = origin_folders[0]['id']
+            print(f"Found origin folder: {origin_folders[0]['name']} (ID: {origin_id})")
+            
+            # Then get yesterday's folder
+            date_query = f"name = '{yesterday}' and '{origin_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
+            print(f"Searching for yesterday's folder with query: {date_query}")
+            date_results = self.drive_service.files().list(
+                q=date_query,
+                spaces='drive',
+                fields='files(id, name)'
+            ).execute()
+            
+            date_folders = date_results.get('files', [])
+            if not date_folders:
+                print("No folder found for yesterday's date")
+                return None
+                
+            print(f"Found yesterday's folder: {date_folders[0]['name']} (ID: {date_folders[0]['id']})")
+            return date_folders[0]['id']
+            
+        except HttpError as e:
+            if e.resp.status == 403:
+                raise PermissionError(f"No access to list contents of folder {self.drive_folder_id}")
+            raise
+
     def get_travel_warnings(self, language: str = "en") -> Dict:
-        """Get all travel warnings for today."""
+        """Get all travel warnings for today, falling back to yesterday's data if today's data is not available."""
         today_folder_id = self._get_today_folder_id()
         if not today_folder_id:
-            print("No folder found for today, returning empty list")
-            return {"response": {}}
+            print("No folder found for today, trying yesterday's folder")
+            today_folder_id = self._get_yesterday_folder_id()
+            if not today_folder_id:
+                print("No folder found for today or yesterday, returning empty list")
+                return {"response": {}}
 
         # Get the travelwarning.json file
         query = f"name = '{settings.DRIVE_TRAVELWARNING_FILE}' and '{today_folder_id}' in parents"
@@ -162,11 +209,14 @@ class DriveService:
             raise
 
     def get_travel_warning(self, warning_id: str, language: str = "en") -> Dict:
-        """Get a specific travel warning by ID."""
+        """Get a specific travel warning by ID, falling back to yesterday's data if today's data is not available."""
         today_folder_id = self._get_today_folder_id()
         if not today_folder_id:
-            print("No folder found for today")
-            return {"response": {}}
+            print("No folder found for today, trying yesterday's folder")
+            today_folder_id = self._get_yesterday_folder_id()
+            if not today_folder_id:
+                print("No folder found for today or yesterday")
+                return {"response": {}}
 
         # Get the travelwarning folder
         travel_query = f"name = '{settings.DRIVE_TRAVELWARNING_FOLDER}' and '{today_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
