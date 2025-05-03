@@ -17,11 +17,11 @@ COPY app ./app
 RUN pip install --no-cache-dir .
 
 # Set environment variables
-ENV PORT=3000
+ENV PORT=8080
 ENV HOST=0.0.0.0
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"] 
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"] 
