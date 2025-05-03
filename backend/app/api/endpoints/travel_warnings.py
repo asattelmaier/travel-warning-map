@@ -1,40 +1,35 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException
-import httpx
 from app.core.config import settings
+from app.core.drive_service import DriveService
 from app.models.travel_warnings import TravelWarningsResponse
 from app.models.travel_warning import TravelWarningResponse
 
 router = APIRouter()
+drive_service = DriveService(drive_folder_id=settings.DRIVE_FOLDER_ID)
 
 @router.get("", response_model=TravelWarningsResponse)
 async def get_travel_warnings(language: Optional[str] = "en"):
     """
-    Fetch all travel warnings from the Auswärtiges Amt API.
+    Fetch all travel warnings from Google Drive.
     """
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                settings.AUSWAERTIGES_AMT_URL,
-                params={"language": language}
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as e:
+        warnings = drive_service.get_travel_warnings(language=language)
+        return warnings
+    except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to fetch travel warnings")
 
 @router.get("/{warning_id}", response_model=TravelWarningResponse)
 async def get_travel_warning(warning_id: str, language: Optional[str] = "en"):
     """
-    Fetch a specific travel warning by ID.
+    Fetch a specific travel warning by ID from Google Drive.
     """
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{settings.AUSWAERTIGES_AMT_URL}/{warning_id}",
-                params={"language": language}
-            )
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPError as e:
+        warning = drive_service.get_travel_warning(warning_id, language=language)
+        if not warning:
+            raise HTTPException(status_code=404, detail="Travel warning not found")
+        return warning
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to fetch travel warning details") 

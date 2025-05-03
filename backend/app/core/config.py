@@ -1,18 +1,20 @@
 from typing import List
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Travel Warning Map API"
+    PROJECT_NAME: str = "Travel Warning Map Backend"
     VERSION: str = "1.0.0"
     
     # CORS settings
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: List[str] = ["http://localhost:4200"]
     
-    # External API settings
-    AUSWAERTIGES_AMT_URL: str = "https://www.auswaertiges-amt.de/opendata/travelwarning"
-    
+    # Google Drive settings
+    DRIVE_FOLDER_ID: str
+    DRIVE_ORIGIN_FOLDER: str = "https://www.auswaertiges-amt.de/opendata"
+    DRIVE_TRAVELWARNING_FOLDER: str = "travelwarning"
+    DRIVE_TRAVELWARNING_FILE: str = "travelwarning.json"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
