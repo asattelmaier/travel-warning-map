@@ -56,14 +56,14 @@ jobs:
         run: gcloud auth configure-docker europe-west3-docker.pkg.dev
 
       - name: Build and Push Backend Image
-        # if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
+        if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.added, 'backend/')
         run: |
           cd backend
           docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-backend/backend:${{ github.sha }} .
           docker push europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-backend/backend:${{ github.sha }}
 
       - name: Build and Push Data Ingestion Image
-        # if: contains(github.event.head_commit.modified, 'data-ingestion/') || contains(github.event.head_commit.added, 'data-ingestion/')
+        if: contains(github.event.head_commit.modified, 'data-ingestion/') || contains(github.event.head_commit.added, 'data-ingestion/')
         run: |
           cd data-ingestion
           docker build -t europe-west3-docker.pkg.dev/${{ env.GCLOUD_PROJECT_ID }}/travel-warning-map-data-ingestion/data-ingestion:${{ github.sha }} .
@@ -114,47 +114,3 @@ jobs:
           terraform apply -auto-approve
           cd ../data-ingestion
           terraform apply -auto-approve
-
-  deploy-frontend:
-    name: Deploy Frontend
-    needs: deploy-infrastructure
-    # if: contains(github.event.head_commit.modified, 'frontend/') || contains(github.event.head_commit.added, 'frontend/')
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Google Auth
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.SERVICE_ACCOUNT }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Dependencies
-        run: |
-          cd frontend
-          npm ci
-
-      - name: Build Frontend
-        run: |
-          cd frontend
-          npm run build
-
-      - name: Deploy to Firebase
-        run: |
-          cd frontend
-          firebase deploy --only hosting --token "$FIREBASE_TOKEN"
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
