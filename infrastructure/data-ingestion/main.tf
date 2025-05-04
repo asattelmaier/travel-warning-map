@@ -65,7 +65,7 @@ resource "google_cloud_run_v2_job" "data_ingestion" {
 resource "google_cloud_scheduler_job" "data_ingestion_scheduler" {
   name             = "data-ingestion-scheduler"
   description      = "Trigger data ingestion job daily"
-  schedule         = "0 0 * * *"  # Run at midnight every day
+  schedule         = "0 12 * * *"  # Run at 12:00 (noon) every day
   time_zone        = "Europe/Berlin"
   attempt_deadline = "320s"
 
