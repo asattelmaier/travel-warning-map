@@ -25,6 +25,7 @@ env:
   TF_VAR_project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
   TF_VAR_region: europe-west3
   TF_VAR_environment: production
+  BASE_HREF: /travel-warning-map-frontend/
 
 jobs:
   build-and-deploy:
@@ -79,7 +80,7 @@ jobs:
         working-directory: frontend
         env:
           TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
-        run: npm run build -- --configuration production --base-href=/travel-warning-map-frontend/
+        run: npm run build -- --configuration production --base-href="/travel-warning-map-frontend/"
 
       - name: Deploy to Cloud Storage
         run: |

@@ -7,7 +7,10 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     
     # CORS settings
-    CORS_ORIGINS: List[str] = ["http://localhost:4200"]
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:4200",
+        "https://storage.googleapis.com"
+    ]
     
     # Google Drive settings
     DRIVE_FOLDER_ID: str
