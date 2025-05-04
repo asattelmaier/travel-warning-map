@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "npm run replace-api-url && ng build --configuration production",
+    "build": "npm run replace-api-url && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "replace-api-url": "sed -i 's|TRAVEL_WARNINGS_API_URL|'\"$TRAVEL_WARNINGS_API_URL\"'|g' src/environments/environment.prod.ts"
