@@ -7,12 +7,14 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
+      - 'infrastructure/frontend/**'
   pull_request:
     branches:
       - main
     paths:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
+      - 'infrastructure/frontend/**'
 
 env:
   PROJECT_ID: travelwarningmap
@@ -30,6 +32,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.GCLOUD_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Init
+        working-directory: infrastructure/frontend
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infrastructure/frontend
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure/frontend
+        run: terraform apply -auto-approve tfplan
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -46,16 +75,6 @@ jobs:
         env:
           TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
         run: npm run build -- --configuration production
-
-      - name: Google Auth
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
 
       - name: Deploy to Cloud Storage
         run: |
