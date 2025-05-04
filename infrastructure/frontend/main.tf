@@ -7,7 +7,7 @@ terraform {
   }
   backend "gcs" {
     bucket = "travel-warning-map-terraform-state"
-    prefix = "frontend"
+    prefix = "terraform/state/frontend"
   }
 }
 
