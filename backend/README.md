@@ -6,7 +6,7 @@ FastAPI backend for the Travel Warning Map application.
 
 - ASGI-compliant FastAPI application
 - Google Drive integration for travel warnings
-- Pydantic models for data validation
+- Pydantic models for data validation (see `app/travel_warning/`)
 - CORS middleware for frontend integration
 - Environment-based configuration
 

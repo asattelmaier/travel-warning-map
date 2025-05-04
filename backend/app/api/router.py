@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import travel_warnings
+from app.travel_warning import api as travel_warnings
 
 api_router = APIRouter()
 

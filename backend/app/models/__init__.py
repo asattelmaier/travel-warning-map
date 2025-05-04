@@ -1,1 +1,0 @@
-"""Models package for the Travel Warning Map API.""" 
