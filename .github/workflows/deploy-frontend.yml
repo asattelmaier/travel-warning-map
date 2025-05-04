@@ -85,4 +85,4 @@ jobs:
       - name: Deploy to Cloud Storage
         run: |
           gsutil -m cp -r frontend/dist/travel-warning-map/* gs://${{ env.BUCKET_NAME }}/
-          gsutil -m cp frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html 
+          gsutil -m cp -h "Cache-Control:no-store" frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html 
