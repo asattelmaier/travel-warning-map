@@ -20,6 +20,8 @@ env:
   PROJECT_ID: travelwarningmap
   REGION: europe-west1
   BUCKET_NAME: travel-warning-map-frontend
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
 
 jobs:
   build-and-deploy:
