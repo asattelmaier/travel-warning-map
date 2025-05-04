@@ -30,14 +30,24 @@ export class MapComponent implements OnInit {
   constructor(private travelWarningService: TravelWarningService, private elementRef: ElementRef) {}
 
   ngOnInit(): void {
-    this.initializeMap();
     this.loadTravelWarnings();
-
     // Listen for modal opened event
     this.elementRef.nativeElement.addEventListener('modalOpened', () => {
       this.isModalOpen = true;
       // Close any open popups
       this.map?.closePopup();
+    });
+  }
+
+  private loadTravelWarnings(): void {
+    this.travelWarningService.getWarnings().subscribe({
+      next: (warnings: TravelWarningSummary[]) => {
+        this.travelWarnings = warnings;
+        this.initializeMap(); // Map erst initialisieren, wenn Daten da sind
+      },
+      error: () => {
+        // Error handling without console output
+      }
     });
   }
 
@@ -129,18 +139,6 @@ export class MapComponent implements OnInit {
           }
         }).addTo(this.map!);
       });
-  }
-
-  private loadTravelWarnings(): void {
-    this.travelWarningService.getWarnings().subscribe({
-      next: (warnings: TravelWarningSummary[]) => {
-        this.travelWarnings = warnings;
-        this.updateMapStyles();
-      },
-      error: () => {
-        // Error handling without console output
-      }
-    });
   }
 
   private updateMapStyles(): void {
