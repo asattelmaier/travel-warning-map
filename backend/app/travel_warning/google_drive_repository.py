@@ -24,7 +24,6 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
         logger.info("Instantiating GoogleDriveTravelWarningRepository...")
         self.drive_folder_id = drive_folder_id
         self.credentials = self._get_credentials()
-        self.drive_service = build('drive', 'v3', credentials=self.credentials)
         self._verify_folder_access()
 
     def _get_credentials(self):
@@ -33,9 +32,13 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
             creds.refresh(Request())
         return creds
 
+    def _get_drive_service(self):
+        return build('drive', 'v3', credentials=self.credentials)
+
     def _verify_folder_access(self) -> None:
+        drive_service = self._get_drive_service()
         try:
-            result = self.drive_service.files().get(
+            result = drive_service.files().get(
                 fileId=self.drive_folder_id,
                 fields='id, name, mimeType'
             ).execute()
@@ -54,8 +57,9 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
                 raise
 
     def _get_folder_id_for_date(self, date: str) -> Optional[str]:
+        drive_service = self._get_drive_service()
         origin_query = f"name = '{settings.DRIVE_ORIGIN_FOLDER}' and '{self.drive_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
-        origin_results = self.drive_service.files().list(
+        origin_results = drive_service.files().list(
             q=origin_query,
             spaces='drive',
             fields='files(id, name)'
@@ -66,7 +70,7 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
         origin_id = origin_folders[0]['id']
         self._validate_folder_structure(origin_id, settings.DRIVE_ORIGIN_FOLDER)
         date_query = f"name = '{date}' and '{origin_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
-        date_results = self.drive_service.files().list(
+        date_results = drive_service.files().list(
             q=date_query,
             spaces='drive',
             fields='files(id, name)'
@@ -79,8 +83,9 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
         return date_id
 
     def _validate_folder_structure(self, folder_id: str, expected_name: str) -> None:
+        drive_service = self._get_drive_service()
         try:
-            result = self.drive_service.files().get(
+            result = drive_service.files().get(
                 fileId=folder_id,
                 fields='id, name, mimeType'
             ).execute()
@@ -102,11 +107,12 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
             raise ValueError("Warning ID must not be longer than 6 digits")
 
     def get_travel_warnings(self, date: str, language: str = "en") -> Dict:
+        drive_service = self._get_drive_service()
         folder_id = self._get_folder_id_for_date(date)
         if not folder_id:
             return {"response": {}}
         query = f"name = '{settings.DRIVE_TRAVELWARNING_FILE}' and '{folder_id}' in parents"
-        results = self.drive_service.files().list(
+        results = drive_service.files().list(
             q=query,
             spaces='drive',
             fields='files(id, name, size, mimeType)'
@@ -115,7 +121,7 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
         if not files or files[0].get('mimeType') != 'application/json':
             return {"response": {}}
         file_id = files[0]['id']
-        request = self.drive_service.files().get_media(fileId=file_id)
+        request = drive_service.files().get_media(fileId=file_id)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
@@ -129,12 +135,13 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
             return {"response": {}}
 
     def get_travel_warning(self, warning_id: str, date: str, language: str = "en") -> Dict:
+        drive_service = self._get_drive_service()
         self._validate_warning_id(warning_id)
         folder_id = self._get_folder_id_for_date(date)
         if not folder_id:
             return {"response": {}}
         travel_query = f"name = '{settings.DRIVE_TRAVELWARNING_FOLDER}' and '{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
-        travel_results = self.drive_service.files().list(
+        travel_results = drive_service.files().list(
             q=travel_query,
             spaces='drive',
             fields='files(id, name)'
@@ -144,7 +151,7 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
             return {"response": {}}
         travel_folder_id = travel_folders[0]['id']
         file_query = f"name = '{warning_id}.json' and '{travel_folder_id}' in parents"
-        file_results = self.drive_service.files().list(
+        file_results = drive_service.files().list(
             q=file_query,
             spaces='drive',
             fields='files(id, name, mimeType)'
@@ -153,7 +160,7 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
         if not files:
             return {"response": {}}
         file = files[0]
-        request = self.drive_service.files().get_media(fileId=file['id'])
+        request = drive_service.files().get_media(fileId=file['id'])
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False

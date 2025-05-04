@@ -10,6 +10,9 @@ logging.getLogger("uvicorn.error").setLevel(logging.INFO)
 logging.getLogger("uvicorn.access").setLevel(logging.INFO)
 logging.info("Test log from main.py (should appear on startup)")
 
+# Suppress googleapiclient.discovery_cache INFO logs
+logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.WARNING)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
