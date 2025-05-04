@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     DRIVE_TRAVELWARNING_FOLDER: str = "travelwarning"
     DRIVE_TRAVELWARNING_FILE: str = "travelwarning.json"
 
+    # Prefill cache on startup (default: True)
+    TRAVEL_WARNING_PREFILL: bool = True
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
