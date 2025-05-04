@@ -79,7 +79,7 @@ jobs:
         working-directory: frontend
         env:
           TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
-        run: npm run build -- --configuration production
+        run: npm run build -- --configuration production --base-href=/travel-warning-map-frontend/
 
       - name: Deploy to Cloud Storage
         run: |
