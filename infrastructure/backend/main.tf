@@ -56,6 +56,9 @@ resource "google_cloud_run_v2_service" "backend" {
         value = var.drive_folder_id
       }
     }
+    # Startup timeout set to 15 minutes (900s) because cache prefill
+    # on startup can take several minutes when loading all warnings
+    timeout = "900s"
   }
 
   depends_on = [data.terraform_remote_state.base]
