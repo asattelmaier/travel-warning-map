@@ -1,16 +1,20 @@
 import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("uvicorn").setLevel(logging.INFO)
+logging.getLogger("uvicorn.error").setLevel(logging.INFO)
+logging.getLogger("uvicorn.access").setLevel(logging.INFO)
+logging.info("Test log from main.py (should appear on startup)")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

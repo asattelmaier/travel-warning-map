@@ -1,3 +1,7 @@
+import logging
+logger = logging.getLogger(__name__)
+logger.info("GoogleDriveTravelWarningRepository module loaded.")
+
 from datetime import datetime, timedelta
 import json
 import io
@@ -17,10 +21,14 @@ SCOPES = [
 
 class GoogleDriveTravelWarningRepository(TravelWarningRepository):
     def __init__(self, drive_folder_id: str):
+        logger.info("Instantiating GoogleDriveTravelWarningRepository...")
         self.drive_folder_id = drive_folder_id
         self.credentials = self._get_credentials()
         self.drive_service = build('drive', 'v3', credentials=self.credentials)
+        self._cache_warnings = None
+        self._cache_details = {}
         self._verify_folder_access()
+        self._load_cache()
 
     def _get_credentials(self):
         creds, _ = default(scopes=SCOPES)
@@ -47,6 +55,130 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
                 )
             else:
                 raise
+
+    def _load_cache(self):
+        logger.info("Prefilling travel warning cache from Google Drive...")
+        today_folder_id = self._get_today_folder_id()
+        if not today_folder_id:
+            today_folder_id = self._get_yesterday_folder_id()
+        if not today_folder_id:
+            logger.warning("No folder found for today or yesterday. Cache will be empty.")
+            self._cache_warnings = {"response": {}}
+            self._cache_details = {}
+            return
+        # Load travelwarning.json
+        logger.info("Loading travelwarning.json...")
+        query = f"name = '{settings.DRIVE_TRAVELWARNING_FILE}' and '{today_folder_id}' in parents"
+        results = self.drive_service.files().list(
+            q=query,
+            spaces='drive',
+            fields='files(id, name, size, mimeType)'
+        ).execute()
+        files = results.get('files', [])
+        if files and files[0].get('mimeType') == 'application/json':
+            file_id = files[0]['id']
+            request = self.drive_service.files().get_media(fileId=file_id)
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done:
+                _, done = downloader.next_chunk()
+            fh.seek(0)
+            content = fh.read().decode()
+            try:
+                self._cache_warnings = json.loads(content)
+                logger.info("Loaded travelwarning.json (%d bytes)", len(content))
+            except Exception as e:
+                logger.error("Failed to parse travelwarning.json: %s", e)
+                self._cache_warnings = {"response": {}}
+        else:
+            logger.warning("No travelwarning.json found.")
+            self._cache_warnings = {"response": {}}
+        # Load all individual warning files
+        logger.info("Loading individual warning files...")
+        warning_ids = []
+        # Try to use contentList from travelwarning.json if available
+        content_list = None
+        if self._cache_warnings and isinstance(self._cache_warnings, dict):
+            content_list = self._cache_warnings.get("response", {}).get("contentList")
+        if isinstance(content_list, list) and all(isinstance(x, str) for x in content_list):
+            warning_ids = content_list
+            logger.info("Using contentList from travelwarning.json (%d ids)", len(warning_ids))
+        else:
+            # Fallback: list all .json files in the folder (with pagination)
+            logger.info("No valid contentList found, listing all .json files in folder (with pagination)...")
+            travel_query = f"name = '{settings.DRIVE_TRAVELWARNING_FOLDER}' and '{today_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
+            travel_results = self.drive_service.files().list(
+                q=travel_query,
+                spaces='drive',
+                fields='files(id, name)'
+            ).execute()
+            travel_folders = travel_results.get('files', [])
+            if not travel_folders:
+                logger.warning("No travelwarning folder found.")
+                self._cache_details = {}
+                return
+            travel_folder_id = travel_folders[0]['id']
+            warning_files = []
+            page_token = None
+            while True:
+                warning_files_results = self.drive_service.files().list(
+                    q=f"'{travel_folder_id}' in parents and name contains '.json'",
+                    spaces='drive',
+                    fields='nextPageToken, files(id, name, mimeType)',
+                    pageToken=page_token
+                ).execute()
+                warning_files.extend(warning_files_results.get('files', []))
+                page_token = warning_files_results.get('nextPageToken')
+                if not page_token:
+                    break
+            logger.info("Found %d .json files in folder.", len(warning_files))
+            for file in warning_files:
+                name = file.get('name')
+                if name and name.endswith('.json'):
+                    warning_ids.append(name[:-5])
+        # Now load all warning files by id
+        travel_query = f"name = '{settings.DRIVE_TRAVELWARNING_FOLDER}' and '{today_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
+        travel_results = self.drive_service.files().list(
+            q=travel_query,
+            spaces='drive',
+            fields='files(id, name)'
+        ).execute()
+        travel_folders = travel_results.get('files', [])
+        if not travel_folders:
+            logger.warning("No travelwarning folder found.")
+            self._cache_details = {}
+            return
+        travel_folder_id = travel_folders[0]['id']
+        loaded_count = 0
+        for i, warning_id in enumerate(warning_ids, 1):
+            file_query = f"name = '{warning_id}.json' and '{travel_folder_id}' in parents"
+            file_results = self.drive_service.files().list(
+                q=file_query,
+                spaces='drive',
+                fields='files(id, name, mimeType)'
+            ).execute()
+            files = file_results.get('files', [])
+            if not files:
+                logger.warning("Warning file %s.json not found in folder.", warning_id)
+                continue
+            file = files[0]
+            try:
+                request = self.drive_service.files().get_media(fileId=file['id'])
+                fh = io.BytesIO()
+                downloader = MediaIoBaseDownload(fh, request)
+                done = False
+                while not done:
+                    _, done = downloader.next_chunk()
+                fh.seek(0)
+                content = fh.read().decode()
+                self._cache_details[warning_id] = json.loads(content)
+                loaded_count += 1
+                logger.info("Loaded warning file %s.json (%d/%d)", warning_id, i, len(warning_ids))
+            except Exception as e:
+                logger.error("Failed to load warning file %s.json: %s", warning_id, e)
+                self._cache_details[warning_id] = {}
+        logger.info("Cache prefill complete. %d warnings loaded.", loaded_count)
 
     def _validate_folder_structure(self, folder_id: str, expected_name: str) -> None:
         try:
@@ -134,89 +266,8 @@ class GoogleDriveTravelWarningRepository(TravelWarningRepository):
             raise ValueError("Warning ID must not be longer than 6 digits")
 
     def get_travel_warnings(self, language: str = "en") -> Dict:
-        today_folder_id = self._get_today_folder_id()
-        if not today_folder_id:
-            today_folder_id = self._get_yesterday_folder_id()
-            if not today_folder_id:
-                return {"response": {}}
-        query = f"name = '{settings.DRIVE_TRAVELWARNING_FILE}' and '{today_folder_id}' in parents"
-        try:
-            results = self.drive_service.files().list(
-                q=query,
-                spaces='drive',
-                fields='files(id, name, size, mimeType)'
-            ).execute()
-            files = results.get('files', [])
-            if not files:
-                return {"response": {}}
-            if files[0].get('mimeType') != 'application/json':
-                raise ValueError(f"File {files[0]['name']} is not a JSON file")
-            request = self.drive_service.files().get_media(fileId=files[0]['id'])
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request)
-            done = False
-            while not done:
-                _, done = downloader.next_chunk()
-            fh.seek(0)
-            content = fh.read().decode()
-            warning_data = json.loads(content)
-            if 'response' in warning_data:
-                return warning_data
-            return {"response": {}}
-        except HttpError as e:
-            if e.resp.status == 403:
-                raise PermissionError(f"No access to travelwarning.json")
-            raise
-        except json.JSONDecodeError as e:
-            raise
-        except Exception as e:
-            raise
+        return self._cache_warnings or {"response": {}}
 
     def get_travel_warning(self, warning_id: str, language: str = "en") -> Dict:
         self._validate_warning_id(warning_id)
-        today_folder_id = self._get_today_folder_id()
-        if not today_folder_id:
-            today_folder_id = self._get_yesterday_folder_id()
-            if not today_folder_id:
-                return {"response": {}}
-        travel_query = f"name = '{settings.DRIVE_TRAVELWARNING_FOLDER}' and '{today_folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder'"
-        try:
-            travel_results = self.drive_service.files().list(
-                q=travel_query,
-                spaces='drive',
-                fields='files(id, name)'
-            ).execute()
-            travel_folders = travel_results.get('files', [])
-            if not travel_folders:
-                return {"response": {}}
-            travel_folder_id = travel_folders[0]['id']
-            self._validate_folder_structure(travel_folder_id, settings.DRIVE_TRAVELWARNING_FOLDER)
-            warning_query = f"name = '{warning_id}.json' and '{travel_folder_id}' in parents"
-            warning_results = self.drive_service.files().list(
-                q=warning_query,
-                spaces='drive',
-                fields='files(id, name, mimeType)'
-            ).execute()
-            warning_files = warning_results.get('files', [])
-            if not warning_files:
-                return {"response": {}}
-            if warning_files[0].get('mimeType') != 'application/json':
-                raise ValueError(f"File {warning_files[0]['name']} is not a JSON file")
-            request = self.drive_service.files().get_media(fileId=warning_files[0]['id'])
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request)
-            done = False
-            while not done:
-                _, done = downloader.next_chunk()
-            fh.seek(0)
-            content = fh.read().decode()
-            warning_data = json.loads(content)
-            return warning_data
-        except HttpError as e:
-            if e.resp.status == 403:
-                raise PermissionError(f"No access to warning file {warning_id}.json")
-            raise
-        except json.JSONDecodeError as e:
-            raise
-        except Exception as e:
-            raise 
+        return self._cache_details.get(warning_id, {"response": {}}) 
