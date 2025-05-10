@@ -53,7 +53,7 @@ export class MapComponent implements OnInit {
 
   private initializeMap(): void {
     this.map = L.map('map').setView([51.1657, 10.4515], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);
 
@@ -65,7 +65,7 @@ export class MapComponent implements OnInit {
           style: (feature) => {
             const countryCode = feature?.properties?.['ISO3166-1-Alpha-2'];
             const warning = this.travelWarnings.find(w => w.countryCode === countryCode);
-            
+
             if (warning) {
               if (warning.warning) {
                 return {
@@ -83,7 +83,7 @@ export class MapComponent implements OnInit {
                 };
               }
             }
-            
+
             return {
               fillColor: '#ffffff',
               fillOpacity: 0,
@@ -94,7 +94,7 @@ export class MapComponent implements OnInit {
           onEachFeature: (feature, layer) => {
             const countryCode = feature?.properties?.['ISO3166-1-Alpha-2'];
             const warning = this.travelWarnings.find(w => w.countryCode === countryCode);
-            
+
             if (warning) {
               layer.on('click', () => {
                 this.travelWarningService.getWarningDetails(warning.id).subscribe({
@@ -146,7 +146,7 @@ export class MapComponent implements OnInit {
       this.geoJsonLayer.setStyle((feature) => {
         const countryCode = feature?.properties?.['ISO3166-1-Alpha-2'];
         const warning = this.travelWarnings.find(w => w.countryCode === countryCode);
-        
+
         if (warning) {
           if (warning.warning) {
             return {
@@ -164,7 +164,7 @@ export class MapComponent implements OnInit {
             };
           }
         }
-        
+
         return {
           fillColor: '#ffffff',
           fillOpacity: 0,
