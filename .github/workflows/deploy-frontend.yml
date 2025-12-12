@@ -31,7 +31,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -76,13 +76,24 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Build frontend
+      - name: Build frontend for Cloud Storage
         working-directory: frontend
         env:
           TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
         run: npm run build -- --configuration production --base-href="/travel-warning-map-frontend/"
 
+      - name: Build frontend for GitHub Pages
+        working-directory: frontend
+        env:
+          TRAVEL_WARNINGS_API_URL: ${{ secrets.TRAVEL_WARNINGS_API_URL }}
+        run: npm run build -- --configuration production --base-href="/travel-warning-map/" --output-path="dist/gh-pages"
+
       - name: Deploy to Cloud Storage
         run: |
           gsutil -m cp -r frontend/dist/travel-warning-map/* gs://${{ env.BUCKET_NAME }}/
-          gsutil -h "Cache-Control:no-store" cp frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html 
+          gsutil -h "Cache-Control:no-store" cp frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: frontend/dist/gh-pages 
