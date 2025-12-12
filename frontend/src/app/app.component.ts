@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
         this.errorMessage = null;
 
         if (progress.active) {
-          this.statusMessage = `Loading data... ${progress.loaded} / ${progress.total}`;
+          this.statusMessage = 'Loading data...';
           setTimeout(() => this.pollProgress(), 1000);
         }
       },

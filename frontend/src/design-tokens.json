@@ -1,0 +1,30 @@
+{
+    "colors": {
+        "brand": {
+            "blue": "#9CD3DD",
+            "red": "#FA785F",
+            "yellow": "#FBC35E",
+            "green": "#059669",
+            "offwhite": "#F7F7F5"
+        },
+        "surface": {
+            "DEFAULT": "#FFFFFF",
+            "alt": "#F2EFE9"
+        },
+        "ui": {
+            "border": "#C2BFBA",
+            "borderDark": "#9D9B97",
+            "divider": "#E6E2DA"
+        },
+        "cta": {
+            "DEFAULT": "#1F7A8C",
+            "hover": "#186574",
+            "pressed": "#13525D"
+        },
+        "text": {
+            "primary": "#1C1C1E",
+            "secondary": "#5A5A5F",
+            "disabled": "#9A9AA0"
+        }
+    }
+}

@@ -1,4 +1,11 @@
-# Travel Warning Map
+<div align="center">
+  <img src="assets/travel-warning-map-logo.png" alt="Travel Warning Map Logo" width="200"/>
+  <h1>Travel Warning Map</h1>
+  <p>
+    <strong>A modern, interactive dashboard visualizing global travel safety.</strong><br>
+    Real-time travel warnings and safety advice from the Federal Foreign Office of Germany.
+  </p>
+</div>
 
 ## Project Description
 This app serves as a proof of concept for my own investigation into inference models for coding. I aim to let the model write the application with minimal intervention, providing only the technical requirements. The goal is to achieve implementation as autonomously as possible by the inference model.

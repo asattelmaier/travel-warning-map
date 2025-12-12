@@ -1,52 +1,20 @@
-.progress-bar-container,
-.error-message {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
-  background: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+// Styles have been moved to Tailwind classes in app.component.html
+
+@keyframes fadeInDelayed {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    // Stay invisible for the first part (delay simulation)
+    100% {
+        opacity: 1;
+    }
 }
 
-.error-message {
-  color: #d32f2f;
-  font-size: 1.2rem;
-  font-weight: 500;
-  padding: 20px;
-}
-
-.progress-info {
-  margin-bottom: 20px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #333;
-}
-
-progress {
-  width: 300px;
-  height: 20px;
-}
-
-.pulsing {
-  animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 0.6;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.6;
-  }
+.fade-in-delayed {
+    animation: fadeInDelayed 0.4s ease-out forwards;
 }

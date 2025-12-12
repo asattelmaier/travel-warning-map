@@ -1,21 +1,50 @@
-<div class="app-container">
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
+<div class="fixed inset-0 w-screen h-screen overflow-hidden font-sans text-text-primary bg-brand-offwhite">
+  <!-- Error Screen -->
+  <div *ngIf="errorMessage"
+    class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-surface p-6 text-center">
+    <div class="text-brand-red text-6xl mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-16 h-16">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+    </div>
+    <div class="text-text-primary text-2xl font-semibold mb-2">Something went wrong</div>
+    <div class="text-text-secondary text-base mb-6 max-w-md">{{ errorMessage }}</div>
+    <button (click)="ngOnInit()"
+      class="px-6 py-2.5 bg-cta hover:bg-cta-hover active:bg-cta-pressed text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-xl active:scale-95">
+      Try Again
+    </button>
   </div>
 
-  <div *ngIf="showProgressBar && !errorMessage" class="progress-bar-container">
-    <div class="progress-info" [class.pulsing]="statusMessage === 'Collecting data...'">
+  <!-- Loading Screen -->
+  <div *ngIf="showProgressBar && !errorMessage"
+    class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-brand-offwhite/90 backdrop-blur-md fade-in-delayed">
+    <div class="text-2xl font-semibold text-text-primary mb-8 tracking-tight"
+      [class.animate-pulse]="statusMessage === 'Collecting data...'">
       {{ statusMessage }}
     </div>
-    <!-- Indeterminate progress bar when collecting (waiting for backend) -->
-    <progress *ngIf="statusMessage === 'Collecting data...'; else deterministic"></progress>
-    <!-- Deterministic progress bar when loading data -->
-    <ng-template #deterministic>
-      <progress [value]="loadingProgress.loaded" [max]="loadingProgress.total"></progress>
-    </ng-template>
+
+    <div class="w-72 h-3 bg-surface-alt rounded-full overflow-hidden shadow-inner ring-1 ring-ui-border/50">
+      <!-- Indeterminate -->
+      <div *ngIf="statusMessage === 'Collecting data...'; else deterministic"
+        class="h-full bg-cta animate-indeterminate-bar w-full origin-left-right"></div>
+
+      <!-- Deterministic -->
+      <ng-template #deterministic>
+        <div class="h-full bg-cta transition-all duration-300 ease-out shadow-[0_0_10px_theme('colors.cta.DEFAULT')]"
+          [style.width.%]="loadingProgress.total ? ((loadingProgress.loaded / loadingProgress.total) * 100) : 0"></div>
+      </ng-template>
+    </div>
+    <div class="mt-4 text-sm text-text-secondary font-medium font-mono">
+      <span *ngIf="statusMessage !== 'Collecting data...'">{{ (loadingProgress.total ? ((loadingProgress.loaded /
+        loadingProgress.total) * 100) : 0) |
+        number:'1.0-0' }}%</span>
+    </div>
   </div>
 
-  <app-map *ngIf="!showProgressBar && !errorMessage"></app-map>
+  <!-- Map -->
+  <app-map *ngIf="!showProgressBar && !errorMessage" class="block w-full h-full relative z-0"></app-map>
 </div>
 
 <app-info-modal *ngIf="showModal" (close)="closeModal()"></app-info-modal>

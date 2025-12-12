@@ -1,62 +1,12 @@
 @use '../../styles/theme' as theme;
 
-.map-container {
-  height: 100vh;
-  width: 100%;
-}
-
 :host {
   display: block;
   height: 100vh;
   width: 100%;
 }
 
-.map-popup {
-  max-width: 300px;
-  background: theme.$background-color;
-  border-radius: theme.$border-radius-md;
-  padding: theme.$spacing-lg;
-  box-shadow: theme.$shadow-md;
-
-  h3 {
-    color: theme.$text-color;
-    font-size: theme.$font-size-lg;
-    margin-bottom: theme.$spacing-md;
-    font-weight: bold;
-  }
-
-  .info-container {
-    background: theme.$white;
-    border-radius: theme.$border-radius-sm;
-    padding: theme.$spacing-md;
-    margin-bottom: theme.$spacing-md;
-
-    p {
-      color: theme.$text-color;
-      font-size: theme.$font-size-base;
-      margin-bottom: theme.$spacing-xs;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  .details-button {
-    width: 100%;
-    padding: theme.$spacing-sm;
-    background-color: theme.$primary-color;
-    color: theme.$white;
-    border: none;
-    border-radius: theme.$border-radius-sm;
-    cursor: pointer;
-    font-size: theme.$font-size-md;
-    font-weight: bold;
-    box-shadow: theme.$shadow-primary;
-    transition: theme.$transition-base;
-
-    &:hover {
-      transform: scale(1.02);
-    }
-  }
+.map-container {
+  height: 100%;
+  width: 100%;
 }
