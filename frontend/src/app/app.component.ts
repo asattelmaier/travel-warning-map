@@ -13,7 +13,7 @@ import { TravelWarningService } from './services/travel-warning.service';
 })
 export class AppComponent implements OnInit {
   errorMessage: string | null = null;
-  showModal = true;
+  showModal = false;
   loadingProgress = { total: 0, loaded: 0, active: false };
   showProgressBar = true;
   statusMessage = 'Initializing...';
@@ -24,6 +24,10 @@ export class AppComponent implements OnInit {
   constructor(private travelWarningService: TravelWarningService) { }
 
   ngOnInit() {
+    const dismissed = localStorage.getItem('experimental_modal_dismissed');
+    if (!dismissed) {
+      this.showModal = true;
+    }
     this.pollProgress();
   }
 
@@ -62,6 +66,7 @@ export class AppComponent implements OnInit {
   }
 
   closeModal() {
+    localStorage.setItem('experimental_modal_dismissed', 'true');
     this.showModal = false;
   }
 }
