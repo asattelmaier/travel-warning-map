@@ -9,7 +9,8 @@ class Settings(BaseSettings):
     # CORS settings
     CORS_ORIGINS: List[str] = [
         "http://localhost:4200",
-        "https://storage.googleapis.com"
+        "https://storage.googleapis.com",
+        "https://asattelmaier.github.io"
     ]
     
     # Google Drive settings
