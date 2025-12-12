@@ -28,9 +28,9 @@ pip install -e ".[dev]"
 ```
 
 3. Set up Google Cloud authentication for local development:
+   **Important:** You must request specific scopes for Google Drive access.
 ```bash
-# Login with your Google account
-gcloud auth application-default login
+gcloud auth application-default login --scopes='https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/cloud-platform'
 ```
 
 4. Create a `.env` file with the following variables:
@@ -38,6 +38,7 @@ gcloud auth application-default login
 PROJECT_NAME=Travel Warning Map Backend
 VERSION=1.0.0
 CORS_ORIGINS=["http://localhost:4200"]
+# You must obtain this ID from the Google Drive URL of the folder you want to share
 DRIVE_FOLDER_ID=your_drive_folder_id_here
 ```
 
@@ -65,8 +66,18 @@ DRIVE_FOLDER_ID=your_drive_folder_id_here
    ```
 
 3. **Troubleshooting**
+   - **Quota Project Error**: If you see an error about a missing "quota project", run:
+     ```bash
+     # List available projects
+     gcloud projects list
+     
+     # Set one as the quota project
+     gcloud auth application-default set-quota-project <YOUR_PROJECT_ID>
+     ```
+     **Note:** If setting the quota project removes your scopes (you get a permission error again), you may need to manually edit `~/.config/gcloud/application_default_credentials.json` to ensure it contains **both** the `quota_project_id` and the correct `scopes`.
+
    - If you get permission errors, ensure:
-     - You're logged in with `gcloud auth application-default login`
+     - You're logged in with `gcloud auth application-default login` with the correctly scopes (see Setup step 3)
      - You have access to the Google Drive folder
      - The `DRIVE_FOLDER_ID` is correct
    - Check the logs for detailed error messages
