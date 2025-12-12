@@ -19,9 +19,15 @@ class TravelWarningCache:
         self._cache_details: Dict[str, Dict[str, dict]] = {}
         self._lock = threading.RLock()
         
+        self._progress: Dict[str, object] = {"total": 0, "loaded": 0, "active": False}
+        
         logger.info("TravelWarningCache initialized (prefill=%s)", settings.TRAVEL_WARNING_PREFILL)
         if settings.TRAVEL_WARNING_PREFILL:
-            self.prefill_for_today()
+            self._progress["active"] = True
+            threading.Thread(target=self.prefill_for_today, daemon=True).start()
+
+    def get_progress(self) -> Dict[str, object]:
+        return self._progress
 
     def _today(self) -> str:
         return datetime.now().strftime('%Y-%m-%d')
@@ -57,11 +63,14 @@ class TravelWarningCache:
 
         used_date = self._load_summary(today)
         if not used_date:
+            self._progress["active"] = False
             return
 
         ids = self._cache_warnings[used_date]['response'].get('contentList', [])
         total = len(ids)
         logger.info("Found %d warnings to load for %s", total, used_date)
+
+        self._progress.update({"total": total, "loaded": 0})
 
         self._cache_details.setdefault(used_date, {})
         missing = [wid for wid in ids if wid not in self._cache_details[used_date]]
@@ -78,9 +87,15 @@ class TravelWarningCache:
                     with self._lock:
                         self._cache_details[used_date][wid] = detail
                     logger.info("Loaded %s (%d/%d)", wid, i, total)
+                
+                # Update progress
+                current_loaded = self._progress["loaded"]
+                if isinstance(current_loaded, int):
+                    self._progress["loaded"] = current_loaded + 1
 
         loaded = len(self._cache_details[used_date])
         logger.info("Prefill complete: %d/%d warnings loaded for %s", loaded, total, used_date)
+        self._progress["active"] = False
 
     def get_all_travel_warnings(self, date: Optional[str] = None, language: str = 'en') -> dict:
         date = date or self._today()

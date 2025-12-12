@@ -12,5 +12,8 @@ class TravelWarningService:
     def get_travel_warning_by_id(self, warning_id: str, language: str = "en", date: str = None) -> Dict:
         return self.cache.get_travel_warning_by_id(warning_id, date=date, language=language)
 
+    def get_cache_status(self) -> Dict:
+        return self.cache.get_progress()
+
     def clear_cache(self):
         self.cache.clear_cache() 

@@ -2,8 +2,20 @@
   <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
-  <app-map></app-map>
+
+  <div *ngIf="showProgressBar && !errorMessage" class="progress-bar-container">
+    <div class="progress-info" [class.pulsing]="statusMessage === 'Collecting data...'">
+      {{ statusMessage }}
+    </div>
+    <!-- Indeterminate progress bar when collecting (waiting for backend) -->
+    <progress *ngIf="statusMessage === 'Collecting data...'; else deterministic"></progress>
+    <!-- Deterministic progress bar when loading data -->
+    <ng-template #deterministic>
+      <progress [value]="loadingProgress.loaded" [max]="loadingProgress.total"></progress>
+    </ng-template>
+  </div>
+
+  <app-map *ngIf="!showProgressBar && !errorMessage"></app-map>
 </div>
 
 <app-info-modal *ngIf="showModal" (close)="closeModal()"></app-info-modal>
-

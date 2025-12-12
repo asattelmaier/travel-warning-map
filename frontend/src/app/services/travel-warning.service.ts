@@ -10,7 +10,7 @@ export class TravelWarningService {
   // Proxy prefix /api, endpoint is /travel-warnings
   private apiUrl = `${environment.travelWarningsApiBase}/travel-warnings`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Fetch the latest travel warning summaries (defaults to English)
@@ -36,5 +36,12 @@ export class TravelWarningService {
    */
   getWarningDetails(id: string, language: 'de' | 'en' = 'en'): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}?language=${language}`);
+  }
+
+  /**
+   * Fetch the current cache prefill progress
+   */
+  getCacheProgress(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/status/progress`);
   }
 }

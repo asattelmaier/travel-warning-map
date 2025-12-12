@@ -34,4 +34,11 @@ async def get_travel_warning(warning_id: str, language: Optional[str] = "en"):
     except HTTPException:
         raise
     except Exception:
-        raise HTTPException(status_code=500, detail="Failed to fetch travel warning details") 
+        raise HTTPException(status_code=500, detail="Failed to fetch travel warning details")
+
+@router.get("/status/progress")
+async def get_cache_status():
+    """
+    Get the current progress of the cache prefill.
+    """
+    return service.get_cache_status() 
