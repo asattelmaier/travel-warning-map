@@ -31,8 +31,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
+      pages: write
 
     steps:
       - name: Checkout code
@@ -93,7 +94,14 @@ jobs:
           gsutil -m cp -r frontend/dist/travel-warning-map/* gs://${{ env.BUCKET_NAME }}/
           gsutil -h "Cache-Control:no-store" cp frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: frontend/dist/gh-pages 
+          path: 'frontend/dist/gh-pages'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
