@@ -55,10 +55,20 @@ resource "google_cloud_run_v2_service" "backend" {
         name  = "DRIVE_FOLDER_ID"
         value = var.drive_folder_id
       }
+      resources {
+        limits = {
+          cpu    = "500m"
+          memory = "256Mi"
+        }
+      }
     }
     # Startup timeout set to 15 minutes (900s) because cache prefill
     # on startup can take several minutes when loading all warnings
     timeout = "900s"
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
   }
 
   depends_on = [data.terraform_remote_state.base]

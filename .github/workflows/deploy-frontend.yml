@@ -91,8 +91,8 @@ jobs:
 
       - name: Deploy to Cloud Storage
         run: |
-          gsutil -m cp -r frontend/dist/travel-warning-map/* gs://${{ env.BUCKET_NAME }}/
-          gsutil -h "Cache-Control:no-store" cp frontend/dist/travel-warning-map/index.html gs://${{ env.BUCKET_NAME }}/index.html
+          gsutil -m cp -r frontend/dist/travel-warning-map/browser/* gs://${{ env.BUCKET_NAME }}/
+          gsutil -h "Cache-Control:no-store" cp frontend/dist/travel-warning-map/browser/index.html gs://${{ env.BUCKET_NAME }}/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -100,7 +100,7 @@ jobs:
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'frontend/dist/gh-pages'
+          path: 'frontend/dist/gh-pages/browser'
 
       - name: Deploy to GitHub Pages
         id: deployment

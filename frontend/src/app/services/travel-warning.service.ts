@@ -15,18 +15,19 @@ export class TravelWarningService {
   /**
    * Fetch the latest travel warning summaries (defaults to English)
    */
-  getWarnings(language: 'de' | 'en' = 'en'): Observable<TravelWarningSummary[]> {
+  getWarnings(language: 'de' | 'en' = 'en'): Observable<{ warnings: TravelWarningSummary[], effectiveDate: string }> {
     return this.http
       .get<any>(`${this.apiUrl}?language=${language}`)
       .pipe(
         map(resp => {
           const r = resp.response;
-          const ids: string[] = r.contentList;
-          return ids.map((id: string) => ({
+          const ids: string[] = r.contentList || [];
+          const warnings = ids.map((id: string) => ({
             // Spread all summary fields except 'id', then assign 'id' explicitly
             ...(r[id] as Omit<TravelWarningSummary, 'id'>),
             id
           }));
+          return { warnings, effectiveDate: resp.effectiveDate };
         })
       );
   }

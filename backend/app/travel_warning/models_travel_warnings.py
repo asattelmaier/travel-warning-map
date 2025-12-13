@@ -46,6 +46,7 @@ class TravelWarning(BaseModel):
 class TravelWarningsResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
+    effectiveDate: Optional[str] = None
     # TravelWarning first so dicts parse as TravelWarning; contentList as List[str]
     response: Dict[str, Union[TravelWarning, List[str]]]
 

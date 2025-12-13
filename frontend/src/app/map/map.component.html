@@ -1,10 +1,7 @@
 <div id="map" class="map-container"></div>
-<app-modal
-  [isOpen]="isModalOpen"
-  [title]="modalTitle"
-  [status]="modalStatus"
-  [lastModified]="modalLastModified"
-  [effective]="modalEffective"
-  [content]="modalContent"
-  (closeModal)="closeModal()"
-></app-modal>
+<div *ngIf="effectiveDate"
+  class="absolute bottom-1 right-1 z-[1000] bg-white/70 backdrop-blur-sm px-2 py-1 rounded text-xs text-text-secondary shadow-sm pointer-events-none">
+  Stand der Daten: {{ effectiveDate | date:'dd.MM.yyyy' }}
+</div>
+<app-modal [isOpen]="isModalOpen" [title]="modalTitle" [status]="modalStatus" [lastModified]="modalLastModified"
+  [effective]="modalEffective" [content]="modalContent" (closeModal)="closeModal()"></app-modal>

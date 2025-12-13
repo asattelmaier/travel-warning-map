@@ -17,6 +17,7 @@ class TravelWarningCache:
         self.repository = repository
         self._cache_warnings: Dict[str, dict] = {}
         self._cache_details: Dict[str, Dict[str, dict]] = {}
+        self._date_aliases: Dict[str, str] = {}
         self._lock = threading.RLock()
         
         self._progress: Dict[str, object] = {"total": 0, "loaded": 0, "active": False}
@@ -42,16 +43,23 @@ class TravelWarningCache:
         """
         data = self.repository.get_travel_warnings(date, language=language)
         if data.get('response'):
+            data['effectiveDate'] = date
             with self._lock:
                 self._cache_warnings[date] = data
+                self._date_aliases[date] = date
             return date
 
         fb = self._fallback_date(date)
         logger.warning("No summary for %s, falling back to %s", date, fb)
         data = self.repository.get_travel_warnings(fb, language=language)
         if data.get('response'):
+            data['effectiveDate'] = fb
             with self._lock:
                 self._cache_warnings[fb] = data
+                # Optimization: Cache the fallback result under the requested date too
+                # to prevent repeated lookups/roundtrips for a missing date.
+                self._cache_warnings[date] = data
+                self._date_aliases[date] = fb
             return fb
 
         logger.error("No summary found for %s or %s", date, fb)
@@ -114,31 +122,43 @@ class TravelWarningCache:
         return self._cache_warnings[used_date]
 
     def get_travel_warning_by_id(self, warning_id: str, date: Optional[str] = None, language: str = 'en') -> dict:
-        date = date or self._today()
-        logger.info("get_travel_warning_by_id %s on %s", warning_id, date)
+        date_requested = date or self._today()
+        logger.info("get_travel_warning_by_id %s on %s", warning_id, date_requested)
 
+        # Ensure summary is loaded (this sets up aliases)
         with self._lock:
-            if date in self._cache_details and warning_id in self._cache_details[date]:
-                logger.info("Cache hit for %s on %s", warning_id, date)
-                return self._cache_details[date][warning_id]
+            if date_requested not in self._cache_warnings:
+                # Release lock to load
+                pass
+            else:
+                # Fast path
+                effective_date = self._date_aliases.get(date_requested, date_requested)
+                if effective_date in self._cache_details and warning_id in self._cache_details[effective_date]:
+                    logger.info("Cache hit for %s on %s (aliased to %s)", warning_id, date_requested, effective_date)
+                    return self._cache_details[effective_date][warning_id]
 
-        # Ensure summary loaded
-        used_date = date if date in self._cache_warnings else self._load_summary(date, language)
-        if not used_date:
-            return {'response': {}}
+        # Load summary via helper if not present
+        if date_requested not in self._cache_warnings:
+            used_date = self._load_summary(date_requested, language)
+            if not used_date:
+                return {'response': {}}
+        
+        # Now resolve effective date from alias
+        with self._lock:
+            effective_date = self._date_aliases.get(date_requested, date_requested)
 
-        self._cache_details.setdefault(used_date, {})
-        if warning_id not in self._cache_details[used_date]:
+        self._cache_details.setdefault(effective_date, {})
+        if warning_id not in self._cache_details[effective_date]:
             try:
-                detail = self.repository.get_travel_warning(warning_id, used_date, language=language)
+                detail = self.repository.get_travel_warning(warning_id, effective_date, language=language)
                 with self._lock:
-                    self._cache_details[used_date][warning_id] = detail
-                logger.info("Loaded detail for %s on %s", warning_id, used_date)
+                    self._cache_details[effective_date][warning_id] = detail
+                logger.info("Loaded detail for %s on %s", warning_id, effective_date)
             except Exception:
-                logger.exception("Failed to load detail for %s on %s", warning_id, used_date)
+                logger.exception("Failed to load detail for %s on %s", warning_id, effective_date)
                 return {'response': {}}
 
-        return self._cache_details[used_date][warning_id]
+        return self._cache_details[effective_date][warning_id]
 
     def clear_cache(self):
         logger.info("Clearing all caches")
