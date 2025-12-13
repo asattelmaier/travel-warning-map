@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  travelWarningsApiBase: ''
+  travelWarningsApiBase: 'TRAVEL_WARNINGS_API_URL'
 };
