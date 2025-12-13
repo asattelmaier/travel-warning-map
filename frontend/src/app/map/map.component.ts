@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import * as L from 'leaflet';
 import { TravelWarningService } from '../services/travel-warning.service';
 import { TravelWarningSummary } from '../models/travel-warning';
@@ -12,7 +12,7 @@ import tokens from '../../design-tokens.json';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
   standalone: true,
-  imports: [CommonModule, LeafletModule, ModalComponent]
+  imports: [LeafletModule, ModalComponent]
 })
 export class MapComponent implements OnInit {
   private map: L.Map | null = null;

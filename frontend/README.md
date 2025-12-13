@@ -1,6 +1,8 @@
 # Travel Warning Map Frontend
 
-Angular frontend for the Travel Warning Map application.
+Angular frontend for the Travel Warning Map application, visualizing global travel warnings using OpenStreetMap and official government data.
+
+
 
 ## Prerequisites
 
@@ -39,11 +41,3 @@ npm run build
 ```
 
 The build artifacts will be stored in the `dist/` directory.
-
-## Running Tests
-
-Execute the unit tests via [Karma](https://karma-runner.github.io):
-
-```bash
-npm test
-```

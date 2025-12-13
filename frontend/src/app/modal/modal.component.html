@@ -1,64 +1,62 @@
-<div *ngIf="isOpen" class="fixed inset-0 z-[10000] flex justify-end">
-  <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" (click)="close()"></div>
-
-  <!-- Slide-out Panel -->
-  <div
-    class="relative w-full md:w-[600px] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-slide-in-right"
-    (click)="$event.stopPropagation()">
-
-    <!-- Header -->
+@if (isOpen) {
+  <div class="fixed inset-0 z-[10000] flex justify-end">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" (click)="close()"></div>
+    <!-- Slide-out Panel -->
     <div
-      class="flex items-center justify-between px-6 py-4 bg-brand-offwhite border-b border-ui-border sticky top-0 z-10 font-sans">
-      <div class="flex items-center gap-3">
-        <h2 class="text-2xl font-bold text-text-primary tracking-tight">{{ title }}</h2>
-        <div class="rounded-full p-1.5 text-white"
-          [class.bg-brand-red]="status.includes('Reisewarnung') && !status.includes('Teilweise') && !status.includes('Keine')"
-          [class.bg-brand-yellow]="status.includes('Teilweise')" [class.bg-brand-green]="status.includes('Keine')">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-            <path fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clip-rule="evenodd" />
-          </svg>
-        </div>
-      </div>
-      <button
-        class="p-2 -mr-2 text-text-disabled hover:text-text-secondary hover:bg-black/5 rounded-full transition-all"
-        (click)="close()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-          class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Body -->
-    <div class="flex-1 overflow-y-auto p-6 custom-scrollbar font-sans bg-surface">
-      <!-- Info Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 pb-8 border-b border-ui-divider">
-        <div>
-          <p class="text-sm font-medium text-text-secondary mb-1">Status</p>
-          <p class="text-lg font-semibold"
-            [class.text-brand-red]="status.includes('Reisewarnung') && !status.includes('Teilweise') && !status.includes('Keine')"
-            [class.text-brand-yellow]="status.includes('Teilweise')"
-            [class.text-brand-green]="status.includes('Keine')">
-            {{ status }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-text-secondary mb-1">Aktualisiert</p>
-          <p class="text-base font-semibold text-text-primary">{{ lastModified }}</p>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-text-secondary mb-1">Gültig seit</p>
-          <p class="text-base font-semibold text-text-primary">{{ effective }}</p>
-        </div>
-      </div>
-
-      <!-- Content -->
+      class="relative w-full md:w-[600px] h-full bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out animate-slide-in-right"
+      (click)="$event.stopPropagation()">
+      <!-- Header -->
       <div
-        class="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-text-primary prose-p:text-text-secondary prose-a:text-cta hover:prose-a:text-cta-hover transition-colors"
+        class="flex items-center justify-between px-6 py-4 bg-brand-offwhite border-b border-ui-border sticky top-0 z-10 font-sans">
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-bold text-text-primary tracking-tight">{{ title }}</h2>
+          <div class="rounded-full p-1.5 text-white"
+            [class.bg-brand-red]="status.includes('Reisewarnung') && !status.includes('Teilweise') && !status.includes('Keine')"
+            [class.bg-brand-yellow]="status.includes('Teilweise')" [class.bg-brand-green]="status.includes('Keine')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <button
+          class="p-2 -mr-2 text-text-disabled hover:text-text-secondary hover:bg-black/5 rounded-full transition-all"
+          (click)="close()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+            class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto p-6 custom-scrollbar font-sans bg-surface">
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 pb-8 border-b border-ui-divider">
+          <div>
+            <p class="text-sm font-medium text-text-secondary mb-1">Status</p>
+            <p class="text-lg font-semibold"
+              [class.text-brand-red]="status.includes('Reisewarnung') && !status.includes('Teilweise') && !status.includes('Keine')"
+              [class.text-brand-yellow]="status.includes('Teilweise')"
+              [class.text-brand-green]="status.includes('Keine')">
+              {{ status }}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-text-secondary mb-1">Aktualisiert</p>
+            <p class="text-base font-semibold text-text-primary">{{ lastModified }}</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-text-secondary mb-1">Gültig seit</p>
+            <p class="text-base font-semibold text-text-primary">{{ effective }}</p>
+          </div>
+        </div>
+        <!-- Content -->
+        <div
+          class="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-text-primary prose-p:text-text-secondary prose-a:text-cta hover:prose-a:text-cta-hover transition-colors"
         [innerHTML]="content"></div>
+      </div>
     </div>
   </div>
-</div>
+}

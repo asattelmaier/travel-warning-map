@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, ElementRef, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class ModalComponent implements AfterViewInit {
   @Input() isOpen = false;
