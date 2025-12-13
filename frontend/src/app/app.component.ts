@@ -28,39 +28,29 @@ export class AppComponent implements OnInit {
     if (!dismissed) {
       this.showModal = true;
     }
+
+    // Start data sync immediately
+    this.travelWarningService.getWarnings('en', true).subscribe();
     this.pollProgress();
   }
 
   pollProgress() {
-    this.travelWarningService.getCacheProgress().subscribe({
+    this.travelWarningService.syncProgress$.subscribe({
       next: (progress) => {
-        // Success - connection established
-        this.retryStartTime = null; // Reset retry timer
         this.loadingProgress = progress;
         this.showProgressBar = progress.active;
         this.errorMessage = null;
 
         if (progress.active) {
-          this.statusMessage = 'Loading data...';
-          setTimeout(() => this.pollProgress(), 1000);
+          this.statusMessage = progress.total > 0
+            ? 'Loading cached data...'
+            : 'Connecting...';
         }
       },
       error: () => {
-        // Connection failed
-        if (this.retryStartTime === null) {
-          this.retryStartTime = Date.now();
-        }
-
-        const elapsed = Date.now() - this.retryStartTime;
-        if (elapsed > this.MAX_RETRY_DURATION) {
-          this.errorMessage = 'An error occurred while loading the application. Please reload the page.';
-          this.showProgressBar = false;
-        } else {
-          this.showProgressBar = true;
-          this.statusMessage = 'Collecting data...';
-          // Retry after 1 second
-          setTimeout(() => this.pollProgress(), 1000);
-        }
+        // This observable shouldn't error as it is a Subject, but just in case
+        this.errorMessage = 'An error occurred while loading local data.';
+        this.showProgressBar = false;
       }
     });
   }

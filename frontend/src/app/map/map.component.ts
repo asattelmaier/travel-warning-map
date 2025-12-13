@@ -44,7 +44,8 @@ export class MapComponent implements OnInit {
   }
 
   private loadTravelWarnings(): void {
-    this.travelWarningService.getWarnings().subscribe({
+    // Sync is handled by AppComponent, we just want the data
+    this.travelWarningService.getWarnings('en', false).subscribe({
       next: (data) => {
         this.travelWarnings = data.warnings;
         this.effectiveDate = data.effectiveDate;

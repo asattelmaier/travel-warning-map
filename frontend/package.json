@@ -7,7 +7,7 @@
     "build": "npm run replace-api-url && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "replace-api-url": "sed -i 's|TRAVEL_WARNINGS_API_URL|'\"$TRAVEL_WARNINGS_API_URL\"'|g' src/environments/environment.prod.ts"
+    "replace-api-url": "cp src/environments/environment.prod.template.ts src/environments/environment.prod.ts && sed -i 's|TRAVEL_WARNINGS_API_URL|'\"$TRAVEL_WARNINGS_API_URL\"'|g' src/environments/environment.prod.ts"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +21,7 @@
     "@angular/router": "^21.0.5",
     "@bluehalo/ngx-leaflet": "^21.0.0",
     "@types/leaflet": "^1.9.21",
+    "idb": "^8.0.3",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.2",
