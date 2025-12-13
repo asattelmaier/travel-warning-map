@@ -40,6 +40,7 @@ Thumbs.db
 
 # Environment files
 src/assets/runtime-env.js
+frontend/src/environments/environment.prod.ts
 
 # profiling files
 chrome-profiler-events*.json
