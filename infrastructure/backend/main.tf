@@ -57,7 +57,7 @@ resource "google_cloud_run_v2_service" "backend" {
       }
       resources {
         limits = {
-          cpu    = "500m"
+          cpu    = "1000m"
           memory = "256Mi"
         }
       }
